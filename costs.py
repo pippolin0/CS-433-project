@@ -3,6 +3,28 @@
 
 import numpy as np
 
+def mse(e):
+    """compute the mse loss given an error vector.
+
+    Args:
+        e: the error vector, numpy array of shape (N,), N is the number of samples.
+        
+    Returns:
+        mse: scalar corresponding to the mse with factor (1 / 2 N) in front of the sum
+    """
+    return e @ e / (2 * len(e))
+
+def mae(e):
+    """compute the mae loss given an error vector.
+
+    Args:
+        e: the error vector, numpy array of shape (N,), N is the number of samples.
+        
+    Returns:
+        mae: scalar corresponding to the mae 
+    """
+    return np.mean(np.abs(e))
+
 def compute_mse(y, tx, w):
     """compute the loss by mse.
     Args:
@@ -17,9 +39,8 @@ def compute_mse(y, tx, w):
     0.006417022764962313
     """
 
-    e = y - tx.dot(w)
-    mse = e.dot(e) / (2 * len(e))
-    return mse
+    e = y - tx @ w
+    return mse(e)
 
 def compute_mae(y, tx, w):
     """compute the loss by mae.
@@ -33,5 +54,4 @@ def compute_mae(y, tx, w):
     """
 
     e = y - tx.dot(w)
-    mae = np.mean(np.abs(e))
-    return mae
+    return mae(e)
