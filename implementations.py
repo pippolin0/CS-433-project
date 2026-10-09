@@ -1,7 +1,7 @@
 import numpy as np
-from helpers import batch_iter
-from costs import compute_mse
-from gradient import compute_gradient
+from utils.helpers import batch_iter
+from utils.costs import compute_mse
+from utils.gradient import compute_gradient
 
 def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
     """The Gradient Descent (GD) algorithm.

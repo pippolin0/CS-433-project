@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from helpers import batch_iter
+from utils.helpers import batch_iter
 
 def compute_subgradient_mae(y, tx, w):
     """Compute a subgradient of the MAE at w.
