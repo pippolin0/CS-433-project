@@ -14,30 +14,20 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
         gamma: a scalar denoting the stepsize
 
     Returns:
-        w_star: the best parameters, i.e. the one for which the loss (mse) is minimized
-        loss_w_star: the minimized loss associated to w_star
+        w: the last computed parameter
+        loss: the loss associated to w
     """
-
-    # Define parameters to store w and loss
     w = initial_w.copy()
-    w_star = w.copy()
-    loss_w_star = compute_mse(y, tx, w)
 
+    # update w
     for _ in range(max_iters):
-
-        # update w
         grad, _ = compute_gradient(y, tx, w)
         w = w - gamma * grad
-
-        # compute loss for updated w
-        loss = compute_mse(y, tx, w)
-
-        # update best variables if needed
-        if loss < loss_w_star:
-            loss_w_star = loss
-            w_star = w.copy()
     
-    return w_star, loss_w_star
+    # compute loss for last w
+    loss = compute_mse(y, tx, w)
+
+    return w, loss
 
 def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
     """The Stochastic Gradient Descent algorithm (SGD). 
@@ -51,29 +41,23 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
         gamma: a scalar denoting the stepsize
 
     Returns:
-        w_star: the best parameters, i.e. the one for which the loss (mse) is minimized
-        loss_w_star: the minimized loss associated to w_star
+        w: the last computed parameter
+        loss: the loss associated to w
     """
 
     # Define parameters 
     batch_size = 1
     w = initial_w.copy()
-    w_star = w.copy()
-    loss_w_star = compute_mse(y, tx, w)
 
+    # update w
     for _ in range(max_iters):
         for y_batch, tx_batch in batch_iter(y, tx, batch_size):
-
-            # update w
             stoch_grad, _ = compute_gradient(y_batch, tx_batch, w)
             w = w - gamma * stoch_grad
-            loss = compute_mse(y, tx, w)
 
-            if loss < loss_w_star:
-                loss_w_star = loss
-                w_star = w.copy()
+    loss = compute_mse(y, tx, w)
 
-    return w_star, loss_w_star
+    return w, loss
 
 def least_squares(y, tx):
     """Calculate the least squares solution.
