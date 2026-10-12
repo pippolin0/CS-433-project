@@ -7,13 +7,13 @@ def compute_accuracy(y_true, y_pred):
 def compute_precision(y_true, y_pred):
     """Computes binary precision score."""
     tp = np.sum((y_true == 1) & (y_pred == 1))
-    fp = np.sum((y_true == 0) & (y_pred == 1))
+    fp = np.sum((y_true == -1) & (y_pred == 1))
     return tp / (tp + fp) if (tp + fp) > 0 else 0.0
 
 def compute_recall(y_true, y_pred):
     """Computes binary recall score."""
     tp = np.sum((y_true == 1) & (y_pred == 1))
-    fn = np.sum((y_true == 1) & (y_pred == 0))
+    fn = np.sum((y_true == 1) & (y_pred == -1))
     return tp / (tp + fn) if (tp + fn) > 0 else 0.0
 
 def compute_f1(y_true, y_pred):
