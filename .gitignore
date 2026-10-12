@@ -2,3 +2,10 @@ __pycache__/
 *.py[cod]
 
 data/*
+figures/*
+
+# Editor settings
+.vscode/
+
+# Temporary test files
+sample.csv
