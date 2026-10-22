@@ -31,6 +31,19 @@ def calculate_hessian(y, tx, w):
     #return (tx.T @ (weights * tx)) / y.shape[0]
 
 def newton_method(y, tx, initial_w, max_iters, gamma):
+    """Implements logistic regression using newton's method.
+
+    Args:
+        y: numpy array of shape (N, ), N is the number of samples.
+        tx: numpy array of shape (N,D), D is the number of features.
+        initial_w: numpy array of shape (D, ), the initial weights of the model.
+        max_iters: scalar, the maximum number of iterations of the model.
+        gamma: scalar, the step-size.
+
+    Returns:
+        w: optimal weights, numpy array of shape(D, ), D is the number of features.
+        loss: the cost of the associated weights, here the cost function is the negative log likelihood.
+    """
     threshold = 1e-8
     w = initial_w.copy()
     previous_loss = neg_log_likelihood(y, tx, w)
