@@ -129,3 +129,19 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
             start_index + batch_size
         )  # The first data point of the following batch
         yield y[start_index:end_index], tx[start_index:end_index]
+
+def sigmoid(t):
+    """apply sigmoid function on t.
+
+    Args:
+        t: scalar or numpy array
+
+    Returns:
+        scalar or numpy array
+
+    >>> sigmoid(np.array([0.1]))
+    array([0.52497919])
+    >>> sigmoid(np.array([0.1, 0.1]))
+    array([0.52497919, 0.52497919])
+    """
+    return 1 / (1 + np.exp(-t))

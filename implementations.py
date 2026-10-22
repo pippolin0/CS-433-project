@@ -1,7 +1,9 @@
 import numpy as np
 from utils.helpers import batch_iter
 from utils.costs import compute_mse
+from utils.costs import neg_log_likelihood
 from utils.gradient import compute_gradient
+from utils.gradient import gradient_neg_ll
 
 def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
     """The Gradient Descent (GD) algorithm.
@@ -102,7 +104,37 @@ def ridge_regression(y, tx, lambda_):
     return w, loss
     
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
-    raise NotImplementedError
+    threshold = 1e-8
+    w = initial_w.copy()
+    previous_loss = neg_log_likelihood(y, tx, w)
+    loss = previous_loss
+
+    for _ in range(max_iters):
+        # update w
+        gradient = gradient_neg_ll(y, tx, w)
+        w = w - gamma * gradient
+        loss = neg_log_likelihood(y, tx, w)
+        # if the update is not significant enough, stop iterating
+        if np.abs(loss - previous_loss) < threshold:
+            break
+        previous_loss = loss
+    
+    return w, loss
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
-    raise NotImplementedError
+    threshold = 1e-8
+    w = initial_w.copy()
+    previous_loss = neg_log_likelihood(y, tx, w)
+    loss = previous_loss
+
+    for _ in range(max_iters):
+        # update w : gradient regularized, loss not
+        gradient = gradient_neg_ll(y, tx, w) + lambda_ * 2 * w
+        w = w - gamma * gradient
+        loss = neg_log_likelihood(y, tx, w)
+        # if the update is not significant enough, stop iterating
+        if np.abs(loss - previous_loss) < threshold:
+            break
+        previous_loss = loss
+    
+    return w, loss

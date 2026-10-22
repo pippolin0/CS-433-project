@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """A function to compute the cost."""
 
+from helpers import sigmoid
 import numpy as np
 
 def mse(e):
@@ -55,3 +56,31 @@ def compute_mae(y, tx, w):
 
     e = y - tx.dot(w)
     return mae(e)
+
+
+def neg_log_likelihood(y, tx, w):
+    """compute the cost by negative log likelihood.
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        w:  shape=(D, 1)
+
+    Returns:
+        a non-negative loss
+
+    >>> y = np.c_[[0., 1.]]
+    >>> tx = np.arange(4).reshape(2, 2)
+    >>> w = np.c_[[2., 3.]]
+    >>> round(neg_log_likelihood(y, tx, w), 8)
+    1.52429481
+    """
+    assert y.shape[0] == tx.shape[0]
+    assert tx.shape[1] == w.shape[0]
+
+    N = y.shape[0]
+
+    # --- vectorized version ---
+    pred = sigmoid(tx @ w)
+    loss = y.T @ np.log(pred) + (1 - y).T @ np.log(1 - pred)
+    return - 1 / N * loss.item()
