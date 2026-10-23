@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from helpers import sigmoid
+from utils.helpers import sigmoid
 
 def compute_gradient(y, tx, w):
     """Computes the gradient at w.

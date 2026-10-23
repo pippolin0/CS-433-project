@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """A function to compute the cost."""
 
-from helpers import sigmoid
+from utils.helpers import sigmoid
 import numpy as np
 
 def mse(e):
