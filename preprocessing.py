@@ -237,3 +237,25 @@ class CDCPreprocessor:
                 yield from self._category_columns(name, raw, rule)
             elif not numerical_only and kind == "multiple_answers":
                 yield from self._multiple_columns(name, raw)
+
+
+def weight_training_data(tx, y, positive_weight=4.0):
+    """Scale training features AND labels for weighted fitting with ordinary ridge.
+
+    Positive examples get `positive_weight`, negatives get 1. We normalize the
+    weights to mean 1 so lambda retains the same meaning as in weighted ridge.
+    Only call this for fitting. Threshold selection and test predictions must
+    use ordinary CDC-preprocessed rows. Inputs are not modified.
+    """
+    y = np.asarray(y)
+    if tx.ndim != 2 or y.shape != (len(tx),) or not len(y):
+        raise ValueError('Expected nonempty training features (N,D) and labels (N,)')
+    if not np.isin(y, [-1, 1]).all():
+        raise ValueError('Expected labels -1/+1')
+    if not np.isfinite(positive_weight) or positive_weight <= 0:
+        raise ValueError('positive_weight must be positive and finite')
+    weights = np.where(y == 1, positive_weight, 1.)
+    factors = np.sqrt(weights / weights.mean())
+    weighted_tx = tx.astype(np.float64, copy=True)
+    weighted_tx *= factors[:, None]
+    return weighted_tx, y.astype(np.float64) * factors
