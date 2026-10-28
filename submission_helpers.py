@@ -1,40 +1,36 @@
-"""CSV loading, threshold selection, and course-format submission writing."""
+"""CDC loading adapter, F1 threshold selection, and batched prediction."""
 import csv
 import numpy as np
+from utils.helpers import load_csv_data
 
 
 def load_data(folder):
+    """Use the course loader, adding CDC feature names and label-ID alignment."""
     with (folder / 'x_train.csv').open() as file:
         names = next(csv.reader(file))[1:]
     with (folder / 'x_test.csv').open() as file:
         test_names = next(csv.reader(file))[1:]
     if names != test_names:
         raise ValueError('Training/test feature names or order differ')
-    def read(name):
-        return np.loadtxt(folder / name, delimiter=',', skiprows=1, ndmin=2,
-                          converters=lambda value: float(value) if value else np.nan)
-    raw = read('x_train.csv')
-    labels = read('y_train.csv')
-    test = read('x_test.csv')
-    if raw.shape[1] != len(names)+1 or test.shape[1] != len(names)+1 or labels.shape[1] != 2:
-        raise ValueError('Unexpected CSV columns')
-    for array in (raw, labels, test):
-        ids = array[:, 0]
-        if (not len(ids) or not np.isfinite(ids).all() or not np.all(ids == np.floor(ids))
-                or len(np.unique(ids)) != len(ids)):
-            raise ValueError('IDs must be unique finite integers within each CSV')
-    if len(raw) != len(labels):
+
+    x_train, x_test, y, train_ids, test_ids = load_csv_data(folder)
+    label_ids = np.genfromtxt(folder / 'y_train.csv', delimiter=',', skip_header=1,
+                              usecols=0, dtype=int, ndmin=1)
+    if len(train_ids) != len(label_ids):
         raise ValueError('Training and label row counts differ')
-    order = np.argsort(labels[:, 0])
-    positions = np.searchsorted(labels[order, 0], raw[:, 0])
-    if np.any(positions >= len(labels)) or not np.array_equal(labels[order[positions], 0], raw[:, 0]):
+    for ids in (train_ids, test_ids, label_ids):
+        if len(np.unique(ids)) != len(ids):
+            raise ValueError('Duplicate IDs in a data file')
+    order = np.argsort(label_ids)
+    positions = np.searchsorted(label_ids[order], train_ids)
+    if np.any(positions >= len(y)) or not np.array_equal(label_ids[order[positions]], train_ids):
         raise ValueError('Training IDs and label IDs differ')
-    y = labels[order[positions], 1]
+    y = y[order[positions]]
     if set(np.unique(y)) != {-1, 1}:
         raise ValueError('Expected both -1 and +1 labels')
-    if np.isinf(raw[:, 1:]).any() or np.isinf(test[:, 1:]).any():
-        raise ValueError('Features must not contain infinity; NaN denotes missing values')
-    return raw[:, 1:], y, test[:, 1:], test[:, 0], names
+    if x_train.shape[1] != len(names) or x_test.shape[1] != len(names):
+        raise ValueError('Unexpected feature columns')
+    return x_train, y, x_test, test_ids, names
 
 
 def training_threshold(y, predictions):
@@ -45,29 +41,6 @@ def training_threshold(y, predictions):
     true_positives = np.cumsum(y[order] == 1)[ends]
     f1 = 2 * true_positives / (ends + 1 + np.sum(y == 1))
     return float(values[ends[np.argmax(f1)]])
-
-
-def create_csv_submission(ids, y_pred, name):
-    """
-    This function creates a csv file named 'name' in the format required for a submission in Kaggle or AIcrowd.
-    The file will contain two columns the first with 'ids' and the second with 'y_pred'.
-    y_pred must be a list or np.array of 1 and -1 otherwise the function will raise a ValueError.
-
-    Args:
-        ids (list,np.array): indices
-        y_pred (list,np.array): predictions on data correspondent to indices
-        name (str): name of the file to be created
-    """
-    # Check that y_pred only contains -1 and 1
-    if not all(i in [-1, 1] for i in y_pred):
-        raise ValueError("y_pred can only contain values -1, 1")
-
-    with open(name, "w", newline="") as csvfile:
-        fieldnames = ["Id", "Prediction"]
-        writer = csv.DictWriter(csvfile, delimiter=",", fieldnames=fieldnames)
-        writer.writeheader()
-        for r1, r2 in zip(ids, y_pred):
-            writer.writerow({"Id": int(r1), "Prediction": int(r2)})
 
 
 def predict_scores(preprocessor, raw, names, w):

@@ -1,7 +1,8 @@
 """Train our best weighted ridge model and save its submission CSV."""
 from pathlib import Path
 import numpy as np
-from submission_helpers import load_data, predict_scores, training_threshold, create_csv_submission
+from submission_helpers import load_data, predict_scores, training_threshold
+from utils.helpers import create_csv_submission
 from preprocessing import CDCPreprocessor, weight_training_data
 
 from implementations import ridge_regression
