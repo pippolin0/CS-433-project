@@ -1,8 +1,8 @@
 """Train our best weighted ridge model and save its submission CSV."""
 from pathlib import Path
 import numpy as np
-from submission_helpers import load_data, predict_scores, training_threshold
-from utils.helpers import create_csv_submission
+from submission_helpers import predict_scores, training_threshold
+from utils.helpers import load_csv_data, create_csv_submission
 from preprocessing import CDCPreprocessor, weight_training_data
 
 from implementations import ridge_regression
@@ -22,7 +22,9 @@ def main():
 
     # --- LOAD DATA ---
     print('Loading data...', flush=True)
-    x_train, y_train, x_test, test_ids, names = load_data(PROJECT / 'data')
+    x_train, x_test, y_train, train_ids, test_ids = load_csv_data(PROJECT / 'data')
+    with (PROJECT / 'data' / 'x_train.csv').open() as file:
+        names = file.readline().strip().split(',')[1:]
 
     # --- PREPROCESSING ---
     print('Preparing CDC features...', flush=True)

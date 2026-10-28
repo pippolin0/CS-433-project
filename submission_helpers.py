@@ -1,36 +1,5 @@
-"""CDC loading adapter, F1 threshold selection, and batched prediction."""
-import csv
+"""F1 threshold selection and batched prediction."""
 import numpy as np
-from utils.helpers import load_csv_data
-
-
-def load_data(folder):
-    """Use the course loader, adding CDC feature names and label-ID alignment."""
-    with (folder / 'x_train.csv').open() as file:
-        names = next(csv.reader(file))[1:]
-    with (folder / 'x_test.csv').open() as file:
-        test_names = next(csv.reader(file))[1:]
-    if names != test_names:
-        raise ValueError('Training/test feature names or order differ')
-
-    x_train, x_test, y, train_ids, test_ids = load_csv_data(folder)
-    label_ids = np.genfromtxt(folder / 'y_train.csv', delimiter=',', skip_header=1,
-                              usecols=0, dtype=int, ndmin=1)
-    if len(train_ids) != len(label_ids):
-        raise ValueError('Training and label row counts differ')
-    for ids in (train_ids, test_ids, label_ids):
-        if len(np.unique(ids)) != len(ids):
-            raise ValueError('Duplicate IDs in a data file')
-    order = np.argsort(label_ids)
-    positions = np.searchsorted(label_ids[order], train_ids)
-    if np.any(positions >= len(y)) or not np.array_equal(label_ids[order[positions]], train_ids):
-        raise ValueError('Training IDs and label IDs differ')
-    y = y[order[positions]]
-    if set(np.unique(y)) != {-1, 1}:
-        raise ValueError('Expected both -1 and +1 labels')
-    if x_train.shape[1] != len(names) or x_test.shape[1] != len(names):
-        raise ValueError('Unexpected feature columns')
-    return x_train, y, x_test, test_ids, names
 
 
 def training_threshold(y, predictions):
