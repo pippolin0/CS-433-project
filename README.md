@@ -1,8 +1,5 @@
 # CS-433 project 1
 
-## Introduction 
-TODO
-
 ## Data
 The data is too heavy to be placed inside the repository. Instead, 
 1. Go to https://www.aicrowd.com/challenges/epfl-machine-learning-project-1/dataset_files and download the dataset.
