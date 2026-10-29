@@ -12,7 +12,7 @@ Note that it is important to keep the folder and file names as is!
 3. Start playing with the dataset!
 
 ## Utilization
-TODO: how to run the project, with commands and explanations
+In order to replicate our best submission on AIcrowd, you can run the command `python -m best_model.run`. This will automatically run our model with the best found parameters.
 
 ## Authors
 - Carl Martin, carl.martin@epfl.ch
