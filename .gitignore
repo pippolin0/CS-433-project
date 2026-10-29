@@ -9,3 +9,4 @@ figures/*
 
 # Temporary test files
 sample.csv
+.vscode/*

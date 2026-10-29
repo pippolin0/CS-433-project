@@ -1,7 +1,9 @@
 import numpy as np
 from utils.helpers import batch_iter
 from utils.costs import compute_mse
+from utils.costs import neg_log_likelihood
 from utils.gradient import compute_gradient
+from utils.gradient import gradient_neg_ll
 
 def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
     """The Gradient Descent (GD) algorithm.
@@ -102,7 +104,68 @@ def ridge_regression(y, tx, lambda_):
     return w, loss
     
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
-    raise NotImplementedError
+    """Implements logistic regression using gradient descent.
+
+    Args:
+        y: numpy array of shape (N, ), N is the number of samples.
+        tx: numpy array of shape (N,D), D is the number of features.
+        initial_w: numpy array of shape (D, ), the initial weights of the model.
+        max_iters: scalar, the maximum number of iterations of the model.
+        gamma: scalar, the step-size used for gradient descent.
+
+    Returns:
+        w: optimal weights, numpy array of shape(D, ), D is the number of features.
+        loss: the cost of the associated weights, here the cost function is the negative log likelihood.
+    """
+    threshold = 1e-8
+    w = initial_w.copy()
+    previous_loss = neg_log_likelihood(y, tx, w)
+    loss = previous_loss
+
+    for iter in range(max_iters):
+        # update w
+        gradient = gradient_neg_ll(y, tx, w)
+        w = w - gamma * gradient
+        loss = neg_log_likelihood(y, tx, w)
+        if iter % 100 == 0:
+            print(f"iter number {iter} : loss = {loss}")
+        # if the update is not significant enough, stop iterating
+        if np.abs(loss - previous_loss) < threshold:
+            break
+        previous_loss = loss
+    
+    return w, loss
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
-    raise NotImplementedError
+    """Implements regularized logistic regression using gradient descent.
+
+    Args:
+        y: numpy array of shape (N, ), N is the number of samples.
+        tx: numpy array of shape (N,D), D is the number of features.
+        lambda_: scalar, the regularizer parameter.
+        initial_w: numpy array of shape (D, ), the initial weights of the model.
+        max_iters: scalar, the maximum number of iterations of the model.
+        gamma: scalar, the step-size used for gradient descent.
+
+    Returns:
+        w: optimal weights, numpy array of shape(D, ), D is the number of features.
+        loss: the cost of the associated weights, here the cost function is the negative log likelihood.
+    """
+    threshold = 1e-8
+    w = initial_w.copy()
+    previous_loss = neg_log_likelihood(y, tx, w)
+    loss = previous_loss
+
+    for iter in range(max_iters):
+        # update w : gradient regularized, loss not
+        gradient = gradient_neg_ll(y, tx, w) + lambda_ * 2 * w
+        w = w - gamma * gradient
+        loss = neg_log_likelihood(y, tx, w)
+        if iter % 100 == 0:
+            print(f"iter number {iter} : loss = {loss}")
+        # if the update is not significant enough, stop iterating
+        if np.abs(loss - previous_loss) < threshold:
+            break
+        previous_loss = loss
+    
+    return w, loss
