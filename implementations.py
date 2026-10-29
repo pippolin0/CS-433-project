@@ -156,11 +156,13 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     previous_loss = neg_log_likelihood(y, tx, w)
     loss = previous_loss
 
-    for _ in range(max_iters):
+    for iter in range(max_iters):
         # update w : gradient regularized, loss not
         gradient = gradient_neg_ll(y, tx, w) + lambda_ * 2 * w
         w = w - gamma * gradient
         loss = neg_log_likelihood(y, tx, w)
+        if iter % 100 == 0:
+            print(f"iter number {iter} : loss = {loss}")
         # if the update is not significant enough, stop iterating
         if np.abs(loss - previous_loss) < threshold:
             break

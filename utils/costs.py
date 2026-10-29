@@ -81,6 +81,6 @@ def neg_log_likelihood(y, tx, w):
     N = y.shape[0]
 
     # --- vectorized version ---
-    pred = sigmoid(tx @ w)
+    pred = np.clip(sigmoid(tx @ w), 1e-15, 1 - 1e-15)
     loss = y.T @ np.log(pred) + (1 - y).T @ np.log(1 - pred)
     return - 1 / N * loss.item()
